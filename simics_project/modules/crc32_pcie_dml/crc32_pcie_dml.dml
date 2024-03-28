@@ -1,0 +1,78 @@
+/*
+  crc32_pcie_dml.dml - A simple CRC32 PCI accelerator with RTL implementation.
+
+  © 2024 Intel Corporation
+
+  This software and the related documents are Intel copyrighted materials, and
+  your use of them is governed by the express license under which they were
+  provided to you ("License"). Unless the License provides otherwise, you may
+  not use, modify, copy, publish, distribute, disclose or transmit this software
+  or the related documents without Intel's prior written permission.
+
+  This software and the related documents are provided as is, with no express or
+  implied warranties, other than those that are expressly stated in the License.
+*/
+
+dml 1.4;
+device crc32_pcie_dml;
+param byte_order = "little-endian";
+import "pci/common.dml";
+import "simics/utils.dml";
+is pci_device;
+param pci_hotplug = true;
+// methods implemented in RTL harness
+extern void crc32_rtl(uint64 src1, uint64 src2);
+extern void setup_rtl_callback(conf_object_t *obj, conf_object_t *cpu);
+header %{
+#include "harness.h"
+%}
+
+bank pci_config {
+    param base_address_registers = ["base_address_0"];
+    register vendor_id { param init_val = 0x8086; }
+    register device_id { param init_val = 0xCC32; }
+
+    register base_address_0 @ 0x10 is (memory_base_address_64) {
+        param size_bits = 10;
+        param map_func = 0;
+    }
+}
+
+bank regs is function_mapped_bank {
+    param function = 0;
+    param register_size = 8;
+    param partial = true;
+    param overlapping = true;
+    register control        @ 0x00 "Control register";
+    register source         @ 0x08 "Source register";
+    register dest           @ 0x10 "Dest register";
+    register data [i < 125] @ 0x18 + i*8 "Data register";   
+}
+
+bank regs {
+    register control {
+        field SIZE @ [15:0] "Size of input array (bytes)";
+        method write_register(uint64 value, uint64 enabled_bytes, void *aux) {
+            default(value, enabled_bytes, aux);
+            do_crc32();
+        }
+        method do_crc32() {
+            if (control.SIZE.val == 0) {
+                log info, 3: "CRC32 with 0 size, nothing to do";
+                return; // no input data
+            } else {
+                log info, 3: "Start CRC32, size: %d bytes, source: 0x%x, dest: 0x%x", control.SIZE.val, source.val, dest.val;
+                try {
+                    setup_rtl_callback(dev.obj, dev.pci_bus.pci_bus.memory_space());
+                    crc32_rtl(source.val, dest.val); // source and dest address
+                    crc32_rtl(0, control.SIZE.val); // initiate computation with given input array size
+                    control.SIZE.val = 0; // reset the size since we are done
+                } catch {
+                    log error: "CRC32 memory access failed";
+                    return;
+                }
+                log info, 3: "Finish CRC32";
+            }
+        }
+    }
+}

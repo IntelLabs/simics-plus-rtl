@@ -1,0 +1,58 @@
+decl {
+! Script to boot a Simics QSP target with Clear Linux
+! And the simple PCIe demo device with leds and buttons
+
+    # Borrow all parameters from the standard file, with some small
+    # changes to default parameters.
+    #
+    params from "%simics%/targets/qsp-x86/qsp-clear-linux.simics"
+        default machine_name         = "machine"
+        default num_cores            = 2
+        default memory_megs          = 8Ki
+        default show_con0            = TRUE
+        default connect_real_network = "napt"
+
+    group "Simulation"
+       param real_time_mode      : bool = TRUE
+       ! Prevents the simulation from running faster than real time.
+       ! Kick in once the target system has booted, since booting with
+       ! real time mode is a waste of time.
+
+    param iso_image : file("*")
+
+    # Return value
+    result system : string
+}
+
+## Set up the base machine
+run-command-file "%simics%/targets/qsp-x86/qsp-clear-linux.simics"
+
+local $media = (new-cdrom-image file = $iso_image)
+$system.cdrom.cd.insert media = $media
+
+## Create the PCIe card and attach it
+load-module crc32_pcie_dml_comp
+$card = ( create-crc32-pcie-dml-comp ($system + ".demo_card") )
+connect $system.mb.nb.pci_slot[1] $card.pci
+## mem_space = $system.mb.nb.pci_bus.mem_space
+instantiate-components
+$system.demo_card.log-level 4
+
+##
+## Set system information 
+##
+$system->system_info = "QSP x86 with Linux - PCIe CRC32 Device"
+
+##
+## Smart real-time-mode: wait until the boot is over, then enable it
+## Allowing Simics to skip over the large amounts of idle time in the
+## UEFI boot, but then allow users to use the target interactively 
+## without login time-outs. 
+##
+if $real_time_mode {
+    script-branch "real_time_mode_enabler" {
+        bp.console_string.wait-for $system.serconsole.con "login: "
+        add-session-comment "Login prompt spotted, enabling real-time-mode"
+        enable-real-time-mode 200
+    }
+}
