@@ -41,7 +41,7 @@ In this step, we will generate Verilog code from the Chisel source, verilate it 
 
 1. `Apptainer> cd /mnt`
 2. `Apptainer> make clean`
-3. `Apptainer> export SIMICS_BASE=/simics/simics-6.0.185`
+3. `Apptainer> export SIMICS_BASE=/simics/simics-7-27.0`
 4. `Apptainer> make`
 5. `Apptainer> export LD_LIBRARY_PATH=/mnt/lib:$LD_LIBRARY_PATH`
 
