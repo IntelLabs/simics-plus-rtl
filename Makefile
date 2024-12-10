@@ -49,7 +49,7 @@ INCLUDES += -I${verilator_build_dir}
 INCLUDES += -isystem${VERILATOR_INC_DIR}/vltstd -isystem${VERILATOR_INC_DIR}
 INCLUDES += -isystem/$(SIMICS_BASE)/src/devices/c++-api -DDISABLE_WARNING_ON_TECH_PREVIEW
 INCLUDES += -isystem/$(SIMICS_BASE)/src/include
-INCLUDES += -isystem/$(SIMICS_BASE)/linux64/api/6/v2
+INCLUDES += -isystem/$(SIMICS_BASE)/linux64/api/7
 
 CXXFLAGS = -faligned-new
 LIB_OBJECTS = $(OBJ)/harness_${CHISEL_TOP_PACKAGE}_${CHISEL_TOP_NAME}.o

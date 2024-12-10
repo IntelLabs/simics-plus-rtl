@@ -32,7 +32,7 @@ You may also use Docker, podman, or simply install packages on your local machin
 
 1. Change to *this* directory (ie. top-level within this git repository).
 2. Drop into an interactive shell within the container. By default, Apptainer does not allow writes to the image. To work around this limitation, we are mounting a host directory as `/mnt` within the container and changing the home directory to `/tmp/user`. Since file modifications will be confined to these two directories, no write errors are encountered. Mount this repository and the Simics installation directory:
-    - `apptainer shell --fakeroot -B ./:/mnt -B /path/to/simics-public/:/simics -H /tmp/user docker/simicsplusrtl.sif`
+    - `apptainer shell --fakeroot -B ./:/run -B ./:/root -B ./:/mnt -B /path/to/simics-public/:/simics -H /tmp/user docker/simicsplusrtl.sif`
 3. Subsequent steps involve executing commands in this shell - so keep it open. They will be prefixed with the `Apptainer> ` prompt for clarity.
 
 ## Chisel source code and associated C++ harness
@@ -60,7 +60,7 @@ The Simics device and component instantiate the shared library built in the sect
 We will now enable the required Quick Start Platform (QSP) packages with this Simics project so we can have a full-fledged system.
 
 1. `Apptainer> cd /mnt/simics_project`
-2. `Apptainer> /bin/addon-manager -C`
+2. `Apptainer> ./bin/addon-manager -C`
 3. `Apptainer> ./bin/addon-manager -s /simics/simics-qsp-x86-6.0.73/`
 4. `Apptainer> ./bin/addon-manager -s /simics/simics-qsp-cpu-6.0.21/`
 5. `Apptainer> ./bin/addon-manager -s /simics/simics-qsp-clear-linux-6.0.15/`
