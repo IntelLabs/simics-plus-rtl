@@ -7,7 +7,7 @@ decl {
     #
     params from "%simics%/targets/qsp-x86/qsp-clear-linux.simics"
         default machine_name         = "machine"
-        default num_cores            = 2
+        default num_cores            = 1
         default memory_megs          = 8Ki
         default show_con0            = TRUE
         default connect_real_network = "napt"
@@ -25,7 +25,7 @@ decl {
 }
 
 ## Set up the base machine
-run-command-file "%simics%/targets/qsp-x86/qsp-clear-linux.simics"
+run-script "%simics%/targets/qsp-x86/qsp-clear-linux.simics"
 
 local $media = (new-cdrom-image file = $iso_image)
 $system.cdrom.cd.insert media = $media
