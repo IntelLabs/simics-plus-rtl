@@ -1,0 +1,23 @@
+diff --git a/variables.mk b/variables.mk
+index fc2fc127..02c0f67b 100644
+--- a/variables.mk
++++ b/variables.mk
+@@ -137,6 +137,18 @@ ifeq ($(SUB_PROJECT),constellation)
+ 	TB                ?= TestDriver
+ 	TOP               ?= NoC
+ endif
++# For Simics+Gemmini
++ifeq ($(SUB_PROJECT),simics-gemmini)
++	SBT_PROJECT       ?= chipyard
++	MODEL             ?= GemminiTestHarness
++	VLOG_MODEL        ?= $(MODEL)
++	MODEL_PACKAGE     ?= simics
++	CONFIG            ?= SimicsGemminiConfig
++	CONFIG_PACKAGE    ?= simics
++	GENERATOR_PACKAGE ?= chipyard
++	TB                ?= GemminiTestHarness
++	TOP               ?= LazyGemminiTestHarness
++endif
+ 
+ 
+ #########################################################################################

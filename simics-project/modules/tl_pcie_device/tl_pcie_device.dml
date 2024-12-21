@@ -1,0 +1,159 @@
+/*
+  endpoint.dml
+
+  © 2023 Intel Corporation
+
+  This software and the related documents are Intel copyrighted materials, and
+  your use of them is governed by the express license under which they were
+  provided to you ("License"). Unless the License provides otherwise, you may
+  not use, modify, copy, publish, distribute, disclose or transmit this software
+  or the related documents without Intel's prior written permission.
+
+  This software and the related documents are provided as is, with no express or
+  implied warranties, other than those that are expressly stated in the License.
+*/
+
+dml 1.4;
+
+device tl_pcie_device;
+param classname = "tl_pcie_device";
+
+param desc = "TileLink-PCIe device";
+param documentation = "TODO";
+
+import "pcie/common.dml";
+import "simics/model-iface/processor-info.dml";
+import "simics/devs/memory-space.dml";
+
+header %{
+#include "tl_pcie_device.h"
+%}
+
+extern typedef struct {
+    void (*get)(conf_object_t *obj, uint64 addr, buffer_t buf, uint64 *ret);
+    void (*put)(conf_object_t *obj, uint64 addr, buffer_t buf, uint64 *ret);
+} tl_pcie_mem_if_interface_t;
+
+extern void init_harness(conf_object_t *obj);
+extern void rocc(conf_object_t *obj, uint32 inst, uint64 rs1, uint64 rs2);
+
+is pcie_endpoint;
+
+param pcie_version = 6.0;
+
+// to change pcie memory size:
+// 1. change number of registers in app1
+// 2. change log size in pcie_config
+// 3. change PCIE_MEM_SIZE in gemmini_mmio.h
+
+bank pcie_config {
+    register device_id { param init_val = 0x9e33; }
+    register vendor_id { param init_val = 0x8086; }
+
+    register bar0 size 8 @ 0x10 is memory_base_address {
+        param map_obj = app0.obj;
+    }
+    register bar1 size 8 @ 0x20 is memory_base_address {
+        param size_bits = 23; // memory base address documented in pcie/common.dml
+        param bar_index = 4;
+        param map_obj = app1.obj;
+    }
+}
+
+bank app0 {
+    register rocc_command_rs1 size 8 @ 0x0 is write {
+        param init_val = 0x0;
+    }
+
+    register rocc_command_rs2 size 8 @ 0x8 is write {
+        param init_val = 0x0;
+    }
+
+    register rocc_command_inst size 4 @ 0x10 is write {
+        param init_val = 0x0;
+    }
+
+    register rocc_command_inst_upper size 4 @ 0x14 is write {
+        param init_val = 0x0;
+    }
+
+    register rocc_command_issue size 8 @ 0x18 is write {
+        param init_val = 0x0;
+        method write(uint64 value) {
+            default(value);
+            log info, 1: "rocc instruction %x", rocc_command_inst.val;
+            rocc(dev.obj, rocc_command_inst.val, rocc_command_rs1.val, rocc_command_rs2.val);
+        }
+    }
+
+    register test_reg size 8 @ 0x20 is write {
+        param init_val = 0x0;
+        method write(uint64 value) {
+            default(value);
+            log info, 1: "trying to translate logical address %x to physical address", value;
+
+            local physical_address_t paddr = vm_translator.processor_info_v2.logical_to_physical(value, 1).address;
+            // access_t and physical_block_t documented in linux64/bin/dml/api/6/1.4/simics/processor/types.dml
+            log info, 1: "got physical address %x", paddr;
+
+            local uint8 buf[16];
+            pmem.memory_space.access_simple(dev.obj, paddr, buf, 16, Sim_RW_Read, Sim_Endian_Target);
+
+            log info, 1: "contents %02x %02x %02x %02x", buf[0], buf[1], buf[2], buf[3];
+        }
+    }
+}
+
+bank app1 {
+    register data [i < 1048576] size 8 @ 0x0 + (i * 0x8) is write {
+        param init_val = 0x0;
+    }
+}
+
+implement tl_pcie_mem_if {
+    method get(uint64 addr, buffer_t buf, uint64 *ret) {
+        // log info, 1: "read address %x", addr;
+
+        local physical_address_t paddr;
+        paddr = vm_translator.processor_info_v2.logical_to_physical(addr, Sim_Access_Read).address;
+        pmem.memory_space.access_simple(dev.obj, paddr, buf.data, buf.len, Sim_RW_Read, Sim_Endian_Target);
+
+        // local uint32 i = 0;
+        // for (i = 0; i < buf.len / 8; i += 1) {
+        //     cast(buf.data, uint64 *)[i] = app1.data[(addr / 8) + i].val;
+        // }
+        // pcie_config.memory.read_bytes(addr, buf);
+        *ret = 0;
+    }
+
+    method put(uint64 addr, buffer_t buf, uint64 *ret) {
+        // log info, 1: "write address %x", addr;
+
+        local physical_address_t paddr;
+        paddr = vm_translator.processor_info_v2.logical_to_physical(addr, Sim_Access_Write).address;
+        pmem.memory_space.access_simple(dev.obj, paddr, buf.data, buf.len, Sim_RW_Write, Sim_Endian_Target);
+
+        // local uint32 i = 0;
+        // for (i = 0; i < buf.len / 8; i += 1) {
+        //     app1.data[(addr / 8) + i].val = cast(buf.data, uint64 *)[i];
+        // }
+        // pcie_config.memory.write_bytes(addr, buf);
+        *ret = 0;
+    }
+}
+
+method post_init() {
+    init_harness(obj);
+}
+
+connect vm_translator {
+    param documentation = "Processor interface for virtual address translation";
+    param configuration = "optional";
+    interface processor_info_v2;
+}
+
+connect pmem {
+    param documentation = "Physical address";
+    param configuration = "optional";
+    interface memory_space;
+}
