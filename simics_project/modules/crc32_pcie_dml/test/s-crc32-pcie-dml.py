@@ -51,6 +51,7 @@ def test_op(mem, regs, in_data):
     regs.crc32_src_reg.write(read_address)
     regs.crc32_dst_reg.write(write_address)
     regs.crc32_ctrl_reg.write(SIZE = len(in_data))
+    simics.SIM_continue(10000)
     # ensure the result is correct
     stest.expect_equal(regs.crc32_ctrl_reg.SIZE, 0) # task is done
     out_data = mem.read(None, write_address, 4, 0)
@@ -66,7 +67,7 @@ pci_bridge = du.Dev([du.PciBridge])  # Non-used PCI bridge, required by bus
 pci_conf = SIM_create_object('memory-space', 'pci_conf')
 pci_io = SIM_create_object('memory-space', 'pci_io')
 pci_mem = SIM_create_object('memory-space', 'pci_mem')
-mem_image = simics.SIM_create_object('image', 'mem_image', [['size', 1 << 10]])
+mem_image = simics.SIM_create_object('image', 'mem_image', [['size', 1 << 20]])
 dma_ram = simics.SIM_create_object('ram', 'dma_ram', [['image', mem_image]])
 pci_mem.map = [[0x1000, dma_ram, 0, 0, mem_image.size]]
 

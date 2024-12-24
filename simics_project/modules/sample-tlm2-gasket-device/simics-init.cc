@@ -13,46 +13,121 @@
 
 // Adapter base class (i.e. the Simics object), etc...
 #include <simics/systemc/systemc_library.h>
-
+#include <simics/c++/devs/signal.h>
+#include "c++/crc32_pcie-interface.h"
+#include "c++/crc32_pcie-interface_gasket.h"
 #include <tlm>
 #include <tlm_utils/simple_initiator_socket.h>
 #include <tlm_utils/simple_target_socket.h>
 // The SystemC TLM device being wrapped
 #include "gasket-device.h"
 
+#define CLASS_NAME "sample_tlm2_gasket_device"
+#define CLASS_TYPE Adapter<GasketDevice>
+
+attr_value_t init_value_get(conf_object_t *obj);
+set_error_t init_value_set(conf_object_t *obj, attr_value_t *val);
+
 namespace scl = simics::systemc;
 // <add id="sample-tlm2-gasket-device/Adapter">
 // <insert-until text="// EOF_GASKET_ADAPTER"/></add>
-template<class TModel>
-class Adapter : public simics::systemc::Adapter {
- public:
+template <class TModel>
+class Adapter : public simics::systemc::Adapter
+{
+public:
     explicit Adapter(simics::ConfObjectRef o)
         : simics::systemc::Adapter(o)
-        , top_("top") {
+        , top_("top")
+    {
 
         simics_memory_space_->set_gasket(scl::tlm2simics::createGasket(
-                &top_.phys_mem_socket_, o));
+            &top_.phys_mem_socket_, o));
+        crc32_device_.set_gasket(scl::simics2tlm::createGasket(
+            &top_.crc32_device_socket_, o));        
+    };
 
+    // Define a C++ port class which implements the signal interface
+    class Port : public simics::Port<CLASS_TYPE>
+        , public scl::simics2tlm::Crc32PcieDeviceGasketAdapter
+    {
+    public:
+        Port(simics::ConfObjectRef o)
+            : simics::Port<Adapter>(o),
+              Crc32PcieDeviceGasketAdapter(&parent()->crc32_device_, parent()) {}
+    
+    };
 
-        }
+    static void init_class(simics::ConfClass *cls)
+    {
+        printf("INIT!!!!!!!!!!!1\n");
+        cls->add(simics::Attribute(
+            "phys_mem", "o",
+            "Physical memory, for outgoing DMA transactions.",
+            ATTR_CLS_VAR(Adapter, simics_memory_space_)));
+        cls->add(simics::Attribute(
+            "src_addr", "i",
+            "Source address",
+            &init_value_get, &init_value_set,
+            Sim_Attr_Optional));
+        cls->add(simics::Attribute(
+            "dst_addr", "i",
+            "Destination address",
+            &init_value_get, &init_value_set,
+            Sim_Attr_Optional));
+        cls->add(simics::Attribute(
+            "length", "i",
+            "Length in bytes",
+            &init_value_get, &init_value_set,
+            Sim_Attr_Optional));
+        // Register a Simics class sample_device_cxx_port.sample
+        auto port = simics::make_class<CLASS_TYPE::Port>(
+            cls->name() + ".sample", "sample C++ port", "");
+        port->add(scl::iface::createAdapter<
+            scl::iface::Crc32PcieSimicsAdapter<CLASS_TYPE::Port>>());
 
-static void init_class(simics::ConfClass *cls) {
-    printf("INIT!!!!!!!!!!!1\n");
-    cls->add(simics::Attribute(
-                     "phys_mem", "o",
-                     "Physical memory, for outgoing DMA transactions.",
-                     ATTR_CLS_VAR(Adapter, simics_memory_space_)));
-}
- private:
+        // Register port class with the device class
+        // When device is created, two port objects with name
+        // <dev_name>.port.sample[0] and <dev_name>.port.sample[1] is created
+        cls->add(port, "port.sample");
+    }
+    TModel &model() { return top_; }
+
+private:
     TModel top_;
     scl::Connector<scl::tlm2simics::MemorySpace> simics_memory_space_;
+    scl::simics2tlm::Crc32PcieDevice crc32_device_;
 };
 // EOF_GASKET_ADAPTER
 
-#define CLASS_NAME "sample_tlm2_gasket_device"
+attr_value_t init_value_get(conf_object_t *obj)
+{
+    auto *o = simics::from_obj<CLASS_TYPE>(obj);
+    return SIM_make_attr_uint64(o->model().source_address);
+}
 
-static void initializeDevice(void) {
-    auto cls = simics::make_class<Adapter<GasketDevice>>(
+set_error_t init_value_set(conf_object_t *obj, attr_value_t *val)
+{
+    auto *o = simics::from_obj<CLASS_TYPE>(obj);
+    o->model().source_address = SIM_attr_integer(*val);
+    return Sim_Set_Ok;
+}
+
+attr_value_t src_value_get(conf_object_t *obj)
+{
+    auto *o = simics::from_obj<CLASS_TYPE>(obj);
+    return SIM_make_attr_uint64(o->model().source_address);
+}
+
+set_error_t src_value_set(conf_object_t *obj, attr_value_t *val)
+{
+    auto *o = simics::from_obj<CLASS_TYPE>(obj);
+    o->model().source_address = SIM_attr_integer(*val);
+    return Sim_Set_Ok;
+}
+
+static void initializeDevice(void)
+{
+    auto cls = simics::make_class<CLASS_TYPE>(
         CLASS_NAME,
         "sample SystemC TLM2 device",
         "The <class>" CLASS_NAME "</class> is a Simics module"
@@ -60,6 +135,7 @@ static void initializeDevice(void) {
         " the use of the Simics SystemC Library.");
 }
 
-extern "C" void init_local(void) {
+extern "C" void init_local(void)
+{
     initializeDevice();
 }

@@ -18,4 +18,3 @@ conf.sim.deprecation_level = 0
 from sample_gasket_comp import *
 
 create_sample_gasket_comp()
-

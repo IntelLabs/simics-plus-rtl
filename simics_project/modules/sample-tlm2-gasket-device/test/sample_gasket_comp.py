@@ -13,6 +13,15 @@ import dev_util as du
 import stest
 from comp import *
 
+class mysnoop(pyobj.ConfObject):
+    class snoop_memory(pyobj.Interface):
+        def operation(self, a,b,c):
+            print("operation called ")
+            print(a)
+            print(b)
+            print(c)
+            return 0
+
 class fake_signal_target:
     cls = simics.confclass('fake-signal-target')
     cls.attr.state('b', default=False)
@@ -59,13 +68,16 @@ class sample_gasket_comp(StandardConnectorComponent):
 
         
         dma_image = self.add_pre_obj('dma_image', 'image')
-        dma_image.size = 0x1000000
+        dma_image.size = 0x3001
         dma_ram = self.add_pre_obj('dma_ram', 'ram')
         dma_ram.image = dma_image
         dma_space = self.add_pre_obj('dma_space', 'memory-space')
         dma_space.map = [[0x0, dma_ram, 0, 0, dma_image.size]]
 
         simulation.phys_mem = dma_space 
+
+        snp = self.add_pre_obj("mysnoop", "mysnoop")
+        # dma_space.snoop_device = snp
 
         simulation.gasket_list = gasket_list
 

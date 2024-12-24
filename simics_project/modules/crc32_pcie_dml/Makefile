@@ -13,6 +13,7 @@
 
 # Simics module makefile
 
+IFACE_FILES := crc32_pcie-interface.h
 SIMICS_API := latest
 THREAD_SAFE:=yes
 MODULE_CLASSES = crc32_pcie_dml
@@ -30,7 +31,7 @@ EXTERNAL_LIB_LOC_BUILD = ../../../../..
 EXTERNAL_LIB_LOC_RUN = ../../../..
 MODULE_CFLAGS  += -I$(EXTERNAL_LIB_LOC_BUILD)
 MODULE_LDFLAGS += -L$(EXTERNAL_LIB_LOC_BUILD)/lib
-MODULE_LDFLAGS += -Wl,-rpath,'$(EXTERNAL_LIB_LOC_RUN)/lib'
-LIBS += -l$(EXTERNAL_LIB_BASE_NAME)
+# MODULE_LDFLAGS += -Wl,-rpath,'$(EXTERNAL_LIB_LOC_RUN)/lib'
+# LIBS += -l$(EXTERNAL_LIB_BASE_NAME)
 
 include $(MODULE_MAKEFILE)

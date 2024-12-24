@@ -17,7 +17,7 @@ MODULE_CLASSES = sample_tlm2_gasket_device \
 
 SRC_FILES = gasket-device.cc simics-init.cc VCrc32__ALL.cpp
 PYTHON_FILES = module_load.py utility.py
-EXTRA_MODULE_VPATH = systemc-commands
+EXTRA_MODULE_VPATH = systemc-commands crc32_pcie_dml
 
 CXXFLAGS += -I/home/awmoore/pta/simics-plus-rtl/build/verilator_sc
 CXXFLAGS += -I/usr/share/verilator/include
