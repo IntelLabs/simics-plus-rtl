@@ -26,7 +26,7 @@
 namespace simics {
 namespace iface {
 
-class Crc32PcieInterface {
+class Crc32IoCmdInterface {
   public:
     using ctype = crc32_pcie_interface_t;
 
@@ -37,7 +37,7 @@ class Crc32PcieInterface {
     class FromC {
       public:
         static bool start_crc(conf_object_t *obj, unsigned int src, unsigned int dst, size_t size, bool blocking) {
-            return get_interface<Crc32PcieInterface>(obj)->start_crc(src, dst, size, blocking);
+            return get_interface<Crc32IoCmdInterface>(obj)->start_crc(src, dst, size, blocking);
         }
     };
 
@@ -45,20 +45,20 @@ class Crc32PcieInterface {
     class ToC {
       public:
         ToC() : obj_(nullptr), iface_(nullptr) {}
-        ToC(conf_object_t *obj, const Crc32PcieInterface::ctype *iface)
+        ToC(conf_object_t *obj, const Crc32IoCmdInterface::ctype *iface)
             : obj_(obj), iface_(iface) {}
 
         bool start_crc(unsigned int src, unsigned int dst, size_t size, bool blocking) const {
             return iface_->start_crc(obj_, src, dst, size, blocking);
         }
 
-        const Crc32PcieInterface::ctype *get_iface() const {
+        const Crc32IoCmdInterface::ctype *get_iface() const {
             return iface_;
         }
 
       private:
         conf_object_t *obj_;
-        const Crc32PcieInterface::ctype *iface_;
+        const Crc32IoCmdInterface::ctype *iface_;
     };
 
     class Info : public InterfaceInfo {
@@ -66,7 +66,7 @@ class Crc32PcieInterface {
         // InterfaceInfo
         std::string name() const override { return CRC32_PCIE_INTERFACE; }
         const interface_t *cstruct() const override {
-            static constexpr Crc32PcieInterface::ctype funcs {
+            static constexpr Crc32IoCmdInterface::ctype funcs {
                 FromC::start_crc,
             };
             return &funcs;

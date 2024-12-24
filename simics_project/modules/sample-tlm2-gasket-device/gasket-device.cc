@@ -148,3 +148,14 @@ void GasketDevice::sendRequest(uint64_t src, uint64_t dst, uint64_t size, bool b
     wait(clock.posedge_event());
   }
 }
+
+void GasketDevice::b_transport(Payload &trans, sc_core::sc_time &t) {
+  printf("b_transport()\n");
+
+    unsigned int size = trans.get_data_length();
+    assert(size == 8 * 4); // Expect 64bits for src.dest, size
+    unsigned char * dataptr = trans.get_data_ptr();
+    uint64_t* args = (uint64_t*) dataptr;
+    printf("src = %x, dst = %x, size = %x\n", args[0], args[1], args[2]);
+    sendRequest(args[0], args[1], args[2], args[3]);
+}

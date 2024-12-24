@@ -45,12 +45,12 @@ public:
 
     // Define a C++ port class which implements the signal interface
     class Port : public simics::Port<CLASS_TYPE>
-        , public scl::simics2tlm::Crc32PcieDeviceGasketAdapter
+        , public scl::simics2tlm::Crc32IoCmdDeviceGasketAdapter
     {
     public:
         Port(simics::ConfObjectRef o)
             : simics::Port<Adapter>(o),
-              Crc32PcieDeviceGasketAdapter(&parent()->crc32_device_, parent()) {}
+              Crc32IoCmdDeviceGasketAdapter(&parent()->crc32_device_, parent()) {}
     
     };
 
@@ -64,7 +64,7 @@ public:
         auto port = simics::make_class<CLASS_TYPE::Port>(
             cls->name() + ".harness", "sample C++ port", "");
         port->add(scl::iface::createAdapter<
-            scl::iface::Crc32PcieSimicsAdapter<CLASS_TYPE::Port>>());
+            scl::iface::Crc32IoCmdSimicsAdapter<CLASS_TYPE::Port>>());
 
         cls->add(port, "port.harness");
     }
@@ -73,7 +73,7 @@ public:
 private:
     TModel top_;
     scl::Connector<scl::tlm2simics::MemorySpace> simics_memory_space_;
-    scl::simics2tlm::Crc32PcieDevice crc32_device_;
+    scl::simics2tlm::Crc32IoCmdDevice crc32_device_;
 };
 // EOF_GASKET_ADAPTER
 
