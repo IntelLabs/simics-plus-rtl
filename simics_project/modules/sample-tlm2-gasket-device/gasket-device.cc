@@ -18,12 +18,7 @@
 #include "verilated_vcd_sc.cpp"
 #include "verilated_threads.cpp"
 
-void GasketDevice::doCommand()
-{
-  // while(true) {
-  // sendRequest();
-  //}
-}
+static bool busy = false;
 
 void GasketDevice::doHandleMemRequest()
 {
@@ -64,14 +59,20 @@ void GasketDevice::doClock()
   tfd->open(("wave" + std::string(".vcd")).c_str());
   while (1)
   {
-    wait(10, sc_core::SC_PS);
+    int delay = io_busy.read() ? 10: 10;
+    wait(delay, sc_core::SC_PS);
     clock.write(true);
     if (tfd)
     {
       tfd->dump(static_cast<vluint64_t>(2 * cycle_count++));
       tfd->flush();
     }
-    wait(10, sc_core::SC_PS);
+    // hold the clock 
+    while(!busy)
+    {
+    wait(delay*10, sc_core::SC_PS);
+    }
+    wait(delay, sc_core::SC_PS);
     clock.write(false);
     if (tfd)
     {
@@ -125,9 +126,12 @@ void GasketDevice::preparePayload(tlm::tlm_generic_payload *pl, uint32_t addr,
   pl->set_streaming_width(count);
 }
 
+
 void GasketDevice::sendRequest(uint64_t src, uint64_t dst, uint64_t size, bool blocking)
 {
   printf("sendRequest(%x, %x, %x)\n", src, dst, size);
+  busy = true;
+    printf("busy = true\n");
   wait(clock.posedge_event());
   io_cmd_valid.write(true);
   io_cmd_bits_rs1.write(src);
@@ -143,9 +147,14 @@ void GasketDevice::sendRequest(uint64_t src, uint64_t dst, uint64_t size, bool b
   io_cmd_valid.write(false);
   io_cmd_bits_rs1.write(0);
   io_cmd_bits_rs2.write(0);
-  while (io_busy.read())
-  {
+  if (blocking) {
     wait(clock.posedge_event());
+    while (io_busy.read() )
+    {
+      wait(clock.posedge_event());
+    }
+    printf("busy = false\n");
+    busy = false;
   }
 }
 

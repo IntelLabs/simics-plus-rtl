@@ -77,7 +77,6 @@ public:
 private:
   VerilatedVcdC *tfd = NULL; // trace file descriptor
 
-  void doCommand();
   void doHandleMemRequest();
   void doClock();
   void readMem(void *buf, uint64_t addr, uint32_t count);
