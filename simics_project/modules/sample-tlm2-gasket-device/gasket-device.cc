@@ -50,11 +50,14 @@ void GasketDevice::doHandleMemRequest()
   }
 }
 
-void GasketDevice::doReset() {
-  while(1) {
+void GasketDevice::doReset()
+{
+  while (1)
+  {
     wait(reset.posedge_event());
     printf("doReset()\n");
-    if( busy == false) {
+    if (busy == false)
+    {
       printf("not busy\n");
       busy = true;
       wait(clock.posedge_event());
@@ -63,7 +66,6 @@ void GasketDevice::doReset() {
     }
   }
 }
-
 
 void GasketDevice::doClock()
 {
@@ -74,7 +76,7 @@ void GasketDevice::doClock()
   tfd->open(("wave" + std::string(".vcd")).c_str());
   while (1)
   {
-    int delay = io_busy.read() ? 10: 10;
+    int delay = 10e12 / *freq_hz_ptr;
     wait(delay, sc_core::SC_PS);
     clock.write(true);
     if (tfd)
@@ -82,11 +84,11 @@ void GasketDevice::doClock()
       tfd->dump(static_cast<vluint64_t>(cycle_count++));
       tfd->flush();
     }
-    // hold the clock 
-    while(!busy)
+    // hold the clock
+    while (!busy)
     {
       printf("In clock gating loop\n");
-      wait(delay*100, sc_core::SC_PS);
+      wait(delay * 100, sc_core::SC_PS);
       tfd->dump(static_cast<vluint64_t>(cycle_count++));
     }
     wait(delay, sc_core::SC_PS);
@@ -143,12 +145,11 @@ void GasketDevice::preparePayload(tlm::tlm_generic_payload *pl, uint32_t addr,
   pl->set_streaming_width(count);
 }
 
-
 void GasketDevice::sendRequest(uint64_t src, uint64_t dst, uint64_t size, bool blocking)
 {
   printf("sendRequest(%x, %x, %x)\n", src, dst, size);
   busy = true;
-    printf("busy = true\n");
+  printf("busy = true\n");
   wait(clock.posedge_event());
   io_cmd_valid.write(true);
   io_cmd_bits_rs1.write(src);
@@ -164,9 +165,10 @@ void GasketDevice::sendRequest(uint64_t src, uint64_t dst, uint64_t size, bool b
   io_cmd_valid.write(false);
   io_cmd_bits_rs1.write(0);
   io_cmd_bits_rs2.write(0);
-  if (blocking) {
+  if (blocking)
+  {
     wait(clock.posedge_event());
-    while (io_busy.read() )
+    while (io_busy.read())
     {
       wait(clock.posedge_event());
     }
@@ -175,13 +177,14 @@ void GasketDevice::sendRequest(uint64_t src, uint64_t dst, uint64_t size, bool b
   }
 }
 
-void GasketDevice::b_transport(Payload &trans, sc_core::sc_time &t) {
+void GasketDevice::b_transport(Payload &trans, sc_core::sc_time &t)
+{
   printf("b_transport()\n");
 
-    unsigned int size = trans.get_data_length();
-    assert(size == 8 * 4); // Expect 64bits for src.dest, size
-    unsigned char * dataptr = trans.get_data_ptr();
-    uint64_t* args = (uint64_t*) dataptr;
-    printf("src = %x, dst = %x, size = %x\n", args[0], args[1], args[2]);
-    sendRequest(args[0], args[1], args[2], args[3]);
+  unsigned int size = trans.get_data_length();
+  assert(size == 8 * 4); // Expect 64bits for src.dest, size
+  unsigned char *dataptr = trans.get_data_ptr();
+  uint64_t *args = (uint64_t *)dataptr;
+  printf("src = %x, dst = %x, size = %x\n", args[0], args[1], args[2]);
+  sendRequest(args[0], args[1], args[2], args[3]);
 }

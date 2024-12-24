@@ -74,6 +74,7 @@ public:
   void sendRequest(uint64_t src, uint64_t dst, uint64_t size, bool blocking);
   sc_core::sc_out<bool> io_busy;
   sc_core::sc_in<bool> reset;
+  uint64_t *freq_hz_ptr;
 
 private:
   VerilatedVcdC *tfd = NULL; // trace file descriptor

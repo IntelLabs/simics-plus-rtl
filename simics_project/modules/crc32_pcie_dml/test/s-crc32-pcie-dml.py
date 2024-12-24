@@ -90,10 +90,10 @@ stest.expect_equal(pci_mem.attr.map[0][1], mycrc32.bank.regs,
                     "PCI device should have been mapped")
 
 test_ids()
-
+conf.mycrc32.engine.freq_hz = int(1e6)
 for i in range(100):
     test_op(pci_mem.iface.memory_space, regs, ''.join(random.choices(string.ascii_lowercase + string.ascii_uppercase + string.digits, k=random.randint(2, 100))))
-    simics.SIM_continue(10000000)
+    #simics.SIM_continue(10000000)
 print("Test passed")
 
 # Test setting BAR to map the device in memory

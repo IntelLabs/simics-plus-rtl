@@ -43,10 +43,18 @@ public:
         crc32_device_.set_gasket(scl::simics2tlm::createGasket(
             &top_.crc32_device_socket_, o));
         systemc_reset_.set_pin(&top_.reset, false, o);
+        top_.freq_hz_ptr = &freq_hz_;
+
+        // Initalize to sane value
+        freq_hz_ = 1 * 1000 * 1000;
     };
 
     static void init_class(simics::ConfClass *cls)
     {
+        cls->add(simics::Attribute(
+            "freq_hz", "i",
+            "frequency of clock in HZ",
+            ATTR_CLS_VAR(Adapter, freq_hz_)));
         cls->add(simics::Attribute(
             "phys_mem", "o",
             "Physical memory, for outgoing DMA transactions.",
@@ -83,6 +91,7 @@ private:
     scl::Connector<scl::tlm2simics::MemorySpace> simics_memory_space_;
     scl::simics2tlm::Crc32IoCmdDevice crc32_device_;
     scl::simics2systemc::Signal systemc_reset_;
+    uint64_t freq_hz_;
 };
 // EOF_GASKET_ADAPTER
 
