@@ -18,7 +18,7 @@
 #include "verilated_vcd_sc.cpp"
 #include "verilated_threads.cpp"
 
-static bool busy = false;
+static volatile bool busy = false;
 
 void GasketDevice::doHandleMemRequest()
 {
@@ -50,6 +50,21 @@ void GasketDevice::doHandleMemRequest()
   }
 }
 
+void GasketDevice::doReset() {
+  while(1) {
+    wait(reset.posedge_event());
+    printf("doReset()\n");
+    if( busy == false) {
+      printf("not busy\n");
+      busy = true;
+      wait(clock.posedge_event());
+      printf("Reset actually done");
+      busy = false;
+    }
+  }
+}
+
+
 void GasketDevice::doClock()
 {
 
@@ -64,19 +79,21 @@ void GasketDevice::doClock()
     clock.write(true);
     if (tfd)
     {
-      tfd->dump(static_cast<vluint64_t>(2 * cycle_count++));
+      tfd->dump(static_cast<vluint64_t>(cycle_count++));
       tfd->flush();
     }
     // hold the clock 
     while(!busy)
     {
-    wait(delay*10, sc_core::SC_PS);
+      printf("In clock gating loop\n");
+      wait(delay*100, sc_core::SC_PS);
+      tfd->dump(static_cast<vluint64_t>(cycle_count++));
     }
     wait(delay, sc_core::SC_PS);
     clock.write(false);
     if (tfd)
     {
-      tfd->dump(static_cast<vluint64_t>(2 * cycle_count++));
+      tfd->dump(static_cast<vluint64_t>(cycle_count++));
       tfd->flush();
     }
   }
