@@ -51,7 +51,8 @@ def test_op(mem, regs, in_data):
     regs.crc32_src_reg.write(read_address)
     regs.crc32_dst_reg.write(write_address)
     regs.crc32_ctrl_reg.write(SIZE = len(in_data))
-    simics.SIM_continue(10000)
+    while(conf.mycrc32.io_busy.level):
+        simics.SIM_continue(10)
     # ensure the result is correct
     stest.expect_equal(regs.crc32_ctrl_reg.SIZE, 0) # task is done
     out_data = mem.read(None, write_address, 4, 0)

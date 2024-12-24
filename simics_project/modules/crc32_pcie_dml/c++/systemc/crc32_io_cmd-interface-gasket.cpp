@@ -1,19 +1,10 @@
 // Autogenerate this file with empty functions for user to fill in
-#ifndef MODULES_CRC32_PCIE_DML_CPP_CRC32_PCIE_INTERFACE_GASKET_H
-#define MODULES_CRC32_PCIE_DML_CPP_CRC32_PCIE_INTERFACE_GASKET_H
-
-#include "c++/crc32_pcie-interface.h"
-#include <simics/iface/interface-info.h>
-#include <simics/utility.h> // get_interface
-#include <simics/systemc/simics2tlm/gasket_owner.h>
-#include <simics/systemc/simics2tlm/extension_sender.h>
-#include <simics/systemc/simics2tlm/gasket_adapter.h>
 
 namespace simics
 {
   namespace systemc
   {
-    namespace iface
+    namespace simics2tlm
     {
 
       bool Crc32IoCmdDeviceGasketAdapter::start_crc(unsigned int arg, unsigned int arg1, size_t arg2, bool blocking)

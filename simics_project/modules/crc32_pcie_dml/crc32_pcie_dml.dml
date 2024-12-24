@@ -23,12 +23,6 @@ import "crc32_pcie-interface.dml";
 
 is pci_device;
 param pci_hotplug = true;
-// methods implemented in RTL harness
-//extern void crc32_rtl(uint64 src1, uint64 src2);
-//extern void setup_rtl_callback(conf_object_t *obj, conf_object_t *cpu);
-header %{
-//#include "harness.h"
-%}
 
 bank pci_config {
     param base_address_registers = ["base_address_0"];
@@ -66,10 +60,7 @@ bank regs {
             } else {
                 log info, 3: "Start CRC32, size: %d bytes, source: 0x%x, dest: 0x%x", control.SIZE.val, source.val, dest.val;
                 try {
-                    //setup_rtl_callback(dev.obj, dev.pci_bus.pci_bus.memory_space());
-                    //crc32_rtl(source.val, dest.val); // source and dest address
-                    engine.iface->start_crc(engine.sample_obj, source.val, dest.val, control.SIZE.val, true);
-                    //crc32_rtl(0, control.SIZE.val); // initiate computation with given input array size
+                    engine.crc32_pcie.start_crc(source.val, dest.val, control.SIZE.val, true);
                     control.SIZE.val = 0; // reset the size since we are done
                 } catch {
                     log error: "CRC32 memory access failed";
@@ -84,19 +75,14 @@ bank regs {
 connect engine is init_as_subobj {
     param classname = "sample_tlm2_gasket_device";
     is post_init;
-    //interface crc32_pcie;
-    session crc32_pcie_interface_t* iface;
-    session conf_object_t* sample_obj;
+    interface crc32_pcie;
 
     method post_init() {
         log info, 1: "post_init()";
-        local attr_value_t memory_space_a = SIM_get_attribute(dev.pci_bus.obj, "memory_space");
-        SIM_set_attribute(dev.engine.obj, "phys_mem", &memory_space_a);
-        sample_obj = SIM_object_descendant(dev.engine.obj, "port.harness");
-        iface = SIM_get_interface(sample_obj, "crc32_pcie");
-        if(iface == NULL) {
-            log error: "Cannot get port interface!!";
-        }
+        local attr_value_t attr = SIM_get_attribute(dev.pci_bus.obj, "memory_space");
+        SIM_set_attribute(dev.engine.obj, "phys_mem", &attr);
+        attr = SIM_make_attr_object(dev.io_busy.obj);
+        SIM_set_attribute(dev.engine.obj, "io_busy", &attr);
     }
 }
 
@@ -105,24 +91,6 @@ connect io_busy is init_as_subobj {
 }
 
 /*
-
-connect systemc2simics_io_busy is init_as_subobj {
-    param classname = "sample_tlm2_gasket_device_gasket_systemc2simics_Signal";
-    is init;
-
-    method init() {
-        default();
-        local attr_value_t attr;
-        attr = SIM_make_attr_string("top.io_busy");
-        SIM_set_attribute_default(this.obj, "signal", attr);
-        attr = SIM_make_attr_object(io_busy.obj);
-        SIM_set_attribute_default(this.obj, "object", attr);
-        attr = SIM_make_attr_object(engine.obj);
-        SIM_set_attribute_default(this.obj, "simulation", attr);
-        log info, 1: "done init";
-    }
-}
-
 connect simics2systemc_reset is init_as_subobj {
     param classname = "sample_tlm2_gasket_device_gasket_simics2systemc_Signal";
 

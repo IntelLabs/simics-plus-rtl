@@ -1,5 +1,6 @@
 // Autogenerate this file??
 #include "crc32_io_cmd-interface-gasket.h"
+#include "../crc32_pcie-interface.h"
 
 #include <string>
 #include <vector>
@@ -12,7 +13,7 @@ namespace simics
     {
 
       /** Adapter for Simics signal interface. */
-      template <typename TBase, typename TInterface = simics::iface::Crc32IoCmdDeviceInterface>
+      template <typename TBase, typename TInterface = simics::systemc::iface::Crc32IoCmdDeviceInterface>
       class Crc32IoCmdSimicsAdapter : public SimicsAdapter<crc32_pcie_interface_t>
       {
       public:

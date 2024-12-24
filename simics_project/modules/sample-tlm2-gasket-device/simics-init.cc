@@ -15,7 +15,8 @@
 #include <simics/systemc/systemc_library.h>
 #include <simics/c++/devs/signal.h>
 #include "c++/crc32_pcie-interface.h"
-#include "c++/crc32_pcie-interface_gasket.h"
+#include "c++/systemc/crc32_io_cmd-interface-gasket.h"
+#include "c++/systemc/crc32_io_cmd-interface-simics-adapter.h"
 #include <tlm>
 #include <tlm_utils/simple_initiator_socket.h>
 #include <tlm_utils/simple_target_socket.h>
@@ -30,45 +31,36 @@ namespace scl = simics::systemc;
 // <insert-until text="// EOF_GASKET_ADAPTER"/></add>
 template <class TModel>
 class Adapter : public simics::systemc::Adapter
+        , public scl::simics2tlm::Crc32IoCmdDeviceGasketAdapter
 {
 public:
     explicit Adapter(simics::ConfObjectRef o)
         : simics::systemc::Adapter(o)
+     ,Crc32IoCmdDeviceGasketAdapter(&crc32_device_, this)
         , top_("top")
     {
 
+        simics_io_busy_->set_pin(&top_.io_busy);
         simics_memory_space_->set_gasket(scl::tlm2simics::createGasket(
             &top_.phys_mem_socket_, o));
         crc32_device_.set_gasket(scl::simics2tlm::createGasket(
             &top_.crc32_device_socket_, o));        
     };
-
-    // Define a C++ port class which implements the signal interface
-    class Port : public simics::Port<CLASS_TYPE>
-        , public scl::simics2tlm::Crc32IoCmdDeviceGasketAdapter
-    {
-    public:
-        Port(simics::ConfObjectRef o)
-            : simics::Port<Adapter>(o),
-              Crc32IoCmdDeviceGasketAdapter(&parent()->crc32_device_, parent()) {}
-    
-    };
-
+              
     static void init_class(simics::ConfClass *cls)
     {
-        printf("INIT!!!!!!!!!!!1\n");
         cls->add(simics::Attribute(
             "phys_mem", "o",
             "Physical memory, for outgoing DMA transactions.",
             ATTR_CLS_VAR(Adapter, simics_memory_space_)));
-        auto port = simics::make_class<CLASS_TYPE::Port>(
-            cls->name() + ".harness", "sample C++ port", "");
-        port->add(scl::iface::createAdapter<
-            scl::iface::Crc32IoCmdSimicsAdapter<CLASS_TYPE::Port>>());
-
-        cls->add(port, "port.harness");
+    cls->add(simics::Attribute("io_busy", "o|n",
+                               "Interrupt target.",
+                               ATTR_CLS_VAR(Adapter, simics_io_busy_)));
+        cls->add(scl::iface::createAdapter<
+            scl::iface::Crc32IoCmdSimicsAdapter<Adapter>>());
     }
     TModel &model() { return top_; }
+    scl::Connector<scl::systemc2simics::Signal> simics_io_busy_;
 
 private:
     TModel top_;

@@ -73,6 +73,7 @@ public:
   void b_transport(Payload &trans, sc_core::sc_time &t);
   void sendRequest(uint64_t src, uint64_t dst, uint64_t size, bool blocking);
 
+  sc_core::sc_out<bool> io_busy;
 private:
   VerilatedVcdC *tfd = NULL; // trace file descriptor
 
@@ -108,7 +109,6 @@ private:
   sc_core::sc_signal<bool> io_resp_valid;
   sc_core::sc_signal<uint64_t> io_resp_bits_data;
 
-  sc_core::sc_signal<bool> io_busy;
 };
 
 // EOF_GASKET_DEVICE
