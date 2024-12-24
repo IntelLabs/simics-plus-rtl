@@ -92,7 +92,7 @@ connect engine is init_as_subobj {
         log info, 1: "post_init()";
         local attr_value_t memory_space_a = SIM_get_attribute(dev.pci_bus.obj, "memory_space");
         SIM_set_attribute(dev.engine.obj, "phys_mem", &memory_space_a);
-        sample_obj = SIM_object_descendant(dev.engine.obj, "port.sample");
+        sample_obj = SIM_object_descendant(dev.engine.obj, "port.harness");
         iface = SIM_get_interface(sample_obj, "crc32_pcie");
         if(iface == NULL) {
             log error: "Cannot get port interface!!";

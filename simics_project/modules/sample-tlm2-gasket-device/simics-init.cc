@@ -25,9 +25,6 @@
 #define CLASS_NAME "sample_tlm2_gasket_device"
 #define CLASS_TYPE Adapter<GasketDevice>
 
-attr_value_t init_value_get(conf_object_t *obj);
-set_error_t init_value_set(conf_object_t *obj, attr_value_t *val);
-
 namespace scl = simics::systemc;
 // <add id="sample-tlm2-gasket-device/Adapter">
 // <insert-until text="// EOF_GASKET_ADAPTER"/></add>
@@ -64,31 +61,12 @@ public:
             "phys_mem", "o",
             "Physical memory, for outgoing DMA transactions.",
             ATTR_CLS_VAR(Adapter, simics_memory_space_)));
-        cls->add(simics::Attribute(
-            "src_addr", "i",
-            "Source address",
-            &init_value_get, &init_value_set,
-            Sim_Attr_Optional));
-        cls->add(simics::Attribute(
-            "dst_addr", "i",
-            "Destination address",
-            &init_value_get, &init_value_set,
-            Sim_Attr_Optional));
-        cls->add(simics::Attribute(
-            "length", "i",
-            "Length in bytes",
-            &init_value_get, &init_value_set,
-            Sim_Attr_Optional));
-        // Register a Simics class sample_device_cxx_port.sample
         auto port = simics::make_class<CLASS_TYPE::Port>(
-            cls->name() + ".sample", "sample C++ port", "");
+            cls->name() + ".harness", "sample C++ port", "");
         port->add(scl::iface::createAdapter<
             scl::iface::Crc32PcieSimicsAdapter<CLASS_TYPE::Port>>());
 
-        // Register port class with the device class
-        // When device is created, two port objects with name
-        // <dev_name>.port.sample[0] and <dev_name>.port.sample[1] is created
-        cls->add(port, "port.sample");
+        cls->add(port, "port.harness");
     }
     TModel &model() { return top_; }
 
@@ -98,32 +76,6 @@ private:
     scl::simics2tlm::Crc32PcieDevice crc32_device_;
 };
 // EOF_GASKET_ADAPTER
-
-attr_value_t init_value_get(conf_object_t *obj)
-{
-    auto *o = simics::from_obj<CLASS_TYPE>(obj);
-    return SIM_make_attr_uint64(o->model().source_address);
-}
-
-set_error_t init_value_set(conf_object_t *obj, attr_value_t *val)
-{
-    auto *o = simics::from_obj<CLASS_TYPE>(obj);
-    o->model().source_address = SIM_attr_integer(*val);
-    return Sim_Set_Ok;
-}
-
-attr_value_t src_value_get(conf_object_t *obj)
-{
-    auto *o = simics::from_obj<CLASS_TYPE>(obj);
-    return SIM_make_attr_uint64(o->model().source_address);
-}
-
-set_error_t src_value_set(conf_object_t *obj, attr_value_t *val)
-{
-    auto *o = simics::from_obj<CLASS_TYPE>(obj);
-    o->model().source_address = SIM_attr_integer(*val);
-    return Sim_Set_Ok;
-}
 
 static void initializeDevice(void)
 {
