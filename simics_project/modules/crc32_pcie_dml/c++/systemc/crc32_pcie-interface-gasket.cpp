@@ -7,14 +7,13 @@ namespace simics
     namespace simics2tlm
     {
 
-      bool Crc32IoCmdDeviceGasketAdapter::start_crc(unsigned int arg, unsigned int arg1, size_t arg2, bool blocking)
+      bool Crc32PcieGasketAdapter::start_crc(unsigned int arg, unsigned int arg1, size_t arg2, bool blocking)
       {
         Context context(simulation_);
-        printf("START_CRC!!!!\n");
-        return crc32_pcie_->start_crc(arg, arg1, arg2, blocking);
+        return iface_->start_crc(arg, arg1, arg2, blocking);
       }
 
-      bool Crc32IoCmdDevice::start_crc(unsigned int arg, unsigned int arg1, size_t arg2, bool blocking)
+      bool Crc32PcieDevice::start_crc(unsigned int arg, unsigned int arg1, size_t arg2, bool blocking)
       {
         printf("start_crc in PcieDevice\n");
         iface::Transaction t = pool_.acquire();

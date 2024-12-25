@@ -13,11 +13,11 @@ namespace simics
     {
 
       /** Adapter for Simics signal interface. */
-      template <typename TBase, typename TInterface = simics::systemc::iface::Crc32IoCmdDeviceInterface>
-      class Crc32IoCmdSimicsAdapter : public SimicsAdapter<crc32_pcie_interface_t>
+      template <typename TBase, typename TInterface = simics::systemc::iface::Crc32PcieSCInterface>
+      class Crc32PcieSimicsAdapter : public SimicsAdapter<crc32_pcie_interface_t>
       {
       public:
-        Crc32IoCmdSimicsAdapter()
+        Crc32PcieSimicsAdapter()
             : SimicsAdapter<crc32_pcie_interface_t>(
                   CRC32_PCIE_INTERFACE, init_iface())
         {
