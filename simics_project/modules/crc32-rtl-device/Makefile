@@ -13,8 +13,8 @@
 
 # Simics module makefile
 
-IFACE_FILES := rtl_crc32-interface.h
-MODULE_CLASSES = rtl_crc32_device \
+IFACE_FILES := crc32_rtl-interface.h
+MODULE_CLASSES = crc32_rtl_device \
 
 SRC_FILES = gasket-device.cc simics-init.cc VCrc32__ALL.cpp
 PYTHON_FILES = module_load.py utility.py

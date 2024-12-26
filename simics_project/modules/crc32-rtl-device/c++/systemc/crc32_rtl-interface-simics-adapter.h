@@ -1,6 +1,6 @@
 // Autogenerate this file??
-#include "rtl_crc32-interface-gasket.h"
-#include "../rtl_crc32-interface.h"
+#include "crc32_rtl-interface-gasket.h"
+#include "../crc32_rtl-interface.h"
 
 #include <string>
 #include <vector>
@@ -13,13 +13,13 @@ namespace simics
     {
 
       /** Adapter for Simics signal interface. */
-      template <typename TBase, typename TInterface = simics::systemc::iface::RtlCrc32SCInterface>
-      class RtlCrc32SimicsAdapter : public SimicsAdapter<rtl_crc32_interface_t>
+      template <typename TBase, typename TInterface = simics::systemc::iface::Crc32RtlSCInterface>
+      class Crc32RtlSimicsAdapter : public SimicsAdapter<crc32_rtl_interface_t>
       {
       public:
-        RtlCrc32SimicsAdapter()
-            : SimicsAdapter<rtl_crc32_interface_t>(
-                  RTL_CRC32_INTERFACE, init_iface())
+        Crc32RtlSimicsAdapter()
+            : SimicsAdapter<crc32_rtl_interface_t>(
+                  CRC32_RTL_INTERFACE, init_iface())
         {
         }
 
@@ -35,9 +35,9 @@ namespace simics
         {
           return descriptionBase<TBase, TInterface>(obj, type);
         }
-        rtl_crc32_interface_t init_iface()
+        crc32_rtl_interface_t init_iface()
         {
-          rtl_crc32_interface_t iface = {};
+          crc32_rtl_interface_t iface = {};
           iface.start_crc = start_crc;
           return iface;
         }

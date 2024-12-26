@@ -18,7 +18,7 @@
 #ifndef PTA_SIMICS_PLUS_RTL_SIMICS_PROJECT_RTL_CRC32_INTERFACE_H
 #define PTA_SIMICS_PLUS_RTL_SIMICS_PROJECT_RTL_CRC32_INTERFACE_H
 
-#include "../rtl_crc32-interface.h"
+#include "../crc32_rtl-interface.h"
 
 #include <simics/iface/interface-info.h>
 #include <simics/utility.h>  // get_interface
@@ -26,9 +26,9 @@
 namespace simics {
 namespace iface {
 
-class RtlCrc32Interface {
+class Crc32RtlInterface {
   public:
-    using ctype = rtl_crc32_interface_t;
+    using ctype = crc32_rtl_interface_t;
 
     // Function override and implemented by user
     virtual bool start_crc(unsigned int src, unsigned int dst, size_t size, bool blocking) = 0;
@@ -37,7 +37,7 @@ class RtlCrc32Interface {
     class FromC {
       public:
         static bool start_crc(conf_object_t *obj, unsigned int src, unsigned int dst, size_t size, bool blocking) {
-            return get_interface<RtlCrc32Interface>(obj)->start_crc(src, dst, size, blocking);
+            return get_interface<Crc32RtlInterface>(obj)->start_crc(src, dst, size, blocking);
         }
     };
 
@@ -45,28 +45,28 @@ class RtlCrc32Interface {
     class ToC {
       public:
         ToC() : obj_(nullptr), iface_(nullptr) {}
-        ToC(conf_object_t *obj, const RtlCrc32Interface::ctype *iface)
+        ToC(conf_object_t *obj, const Crc32RtlInterface::ctype *iface)
             : obj_(obj), iface_(iface) {}
 
         bool start_crc(unsigned int src, unsigned int dst, size_t size, bool blocking) const {
             return iface_->start_crc(obj_, src, dst, size, blocking);
         }
 
-        const RtlCrc32Interface::ctype *get_iface() const {
+        const Crc32RtlInterface::ctype *get_iface() const {
             return iface_;
         }
 
       private:
         conf_object_t *obj_;
-        const RtlCrc32Interface::ctype *iface_;
+        const Crc32RtlInterface::ctype *iface_;
     };
 
     class Info : public InterfaceInfo {
       public:
         // InterfaceInfo
-        std::string name() const override { return RTL_CRC32_INTERFACE; }
+        std::string name() const override { return CRC32_RTL_INTERFACE; }
         const interface_t *cstruct() const override {
-            static constexpr RtlCrc32Interface::ctype funcs {
+            static constexpr Crc32RtlInterface::ctype funcs {
                 FromC::start_crc,
             };
             return &funcs;

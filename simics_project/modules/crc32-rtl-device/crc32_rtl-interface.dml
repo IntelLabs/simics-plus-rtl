@@ -8,17 +8,17 @@
 // the "Defining a New Interface Type" section of the
 // "Simics Model Builder User's Guide" for further documentation.
 // The corresponding C definition can be found in
-// rtl_crc32-interface.h.
+// crc32_rtl-interface.h.
 
 dml 1.4;
 
 header %{
-#include "rtl_crc32-interface.h"
+#include "crc32_rtl-interface.h"
 %}
 
 // Define the new interface type
 extern typedef struct {
     bool (*start_crc)(conf_object_t *obj, uint64 src, uint64 dst, uint64 length, bool blocking);
-} rtl_crc32_interface_t;
+} crc32_rtl_interface_t;
 
-extern const char *const RTL_CRC32_INTERFACE;
+extern const char *const CRC32_RTL_INTERFACE;

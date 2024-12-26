@@ -13,7 +13,7 @@
 import cli
 from . import utility
 
-device_class_names = ["rtl_crc32_device",]
+device_class_names = ["crc32_rtl_device",]
 
 #
 # ------------------------ info -----------------------

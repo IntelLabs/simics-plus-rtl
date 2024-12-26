@@ -30,13 +30,13 @@ extern "C" {
 
 /* This defines a new interface type. Its corresponding C data type will be
    called "crc32_pcie_interface_t". */
-SIM_INTERFACE(rtl_crc32) {
+SIM_INTERFACE(crc32_rtl) {
         bool (*start_crc)(conf_object_t *obj, unsigned int src, unsigned int dst, size_t size, bool blocking);
 };
 
 /* Use a #define like this whenever you need to use the name of the interface
    type; the C compiler will then catch any typos at compile-time. */
-#define RTL_CRC32_INTERFACE "rtl_crc32"
+#define CRC32_RTL_INTERFACE "crc32_rtl"
 
 #ifdef __cplusplus
 }

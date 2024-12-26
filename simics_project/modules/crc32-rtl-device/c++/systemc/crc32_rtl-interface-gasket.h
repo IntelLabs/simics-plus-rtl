@@ -26,13 +26,13 @@ namespace simics {
 namespace systemc {
 namespace iface {
 
-class RtlCrc32SCInterface {
+class Crc32RtlSCInterface {
 
     // Function convert C interface call to C++ interface call
       public:
         virtual bool start_crc( unsigned int src, unsigned int dst, size_t size, bool blocking) = 0;
 
-        virtual ~RtlCrc32SCInterface() {};
+        virtual ~Crc32RtlSCInterface() {};
 };
 
 }  // namespace iface
@@ -45,12 +45,12 @@ namespace simics {
 namespace systemc {
 namespace simics2tlm {
 
-class RtlCrc32GasketAdapter 
-           : public iface::RtlCrc32SCInterface
-           , public GasketAdapter<iface::RtlCrc32SCInterface>
+class Crc32RtlGasketAdapter 
+           : public iface::Crc32RtlSCInterface
+           , public GasketAdapter<iface::Crc32RtlSCInterface>
 {
 public:
-    RtlCrc32GasketAdapter(iface::RtlCrc32SCInterface *iface, iface::SimulationInterface *simulation)
+    Crc32RtlGasketAdapter(iface::Crc32RtlSCInterface *iface, iface::SimulationInterface *simulation)
     : iface_(iface), simulation_(simulation) {}
 
 
@@ -63,15 +63,15 @@ public:
         }
 
     private:
-        iface::RtlCrc32SCInterface *iface_;
+        iface::Crc32RtlSCInterface *iface_;
         iface::SimulationInterface *simulation_;
 };
 
-class RtlCrc32Device : public simics::systemc::iface::RtlCrc32SCInterface
+class Crc32RtlDevice : public simics::systemc::iface::Crc32RtlSCInterface
                    , public GasketOwner
 {
    public:
-    RtlCrc32Device() {
+    Crc32RtlDevice() {
         set_type();
     }
             bool start_crc( unsigned int src, unsigned int dst, size_t size, bool blocking);
@@ -84,5 +84,5 @@ class RtlCrc32Device : public simics::systemc::iface::RtlCrc32SCInterface
 }  // namespace simics2tlm
 }  // namespace systemc
 }  // namespace simics
-#include "rtl_crc32-interface-gasket.cpp"
+#include "crc32_rtl-interface-gasket.cpp"
 #endif
