@@ -13,7 +13,7 @@
 
 # Simics module makefile
 
-IFACE_FILES := crc32_pcie-interface.h
+IFACE_FILES := rtl_crc32-interface.h
 SIMICS_API := latest
 THREAD_SAFE:=yes
 MODULE_CLASSES = crc32_pcie_dml

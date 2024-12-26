@@ -8,17 +8,17 @@
 // the "Defining a New Interface Type" section of the
 // "Simics Model Builder User's Guide" for further documentation.
 // The corresponding C definition can be found in
-// crc32_pcie-interface.h.
+// rtl_crc32-interface.h.
 
 dml 1.4;
 
 header %{
-#include "crc32_pcie-interface.h"
+#include "rtl_crc32-interface.h"
 %}
 
 // Define the new interface type
 extern typedef struct {
     bool (*start_crc)(conf_object_t *obj, uint64 src, uint64 dst, uint64 length, bool blocking);
-} crc32_pcie_interface_t;
+} rtl_crc32_interface_t;
 
-extern const char *const CRC32_PCIE_INTERFACE;
+extern const char *const RTL_CRC32_INTERFACE;

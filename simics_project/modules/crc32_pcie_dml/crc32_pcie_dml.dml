@@ -19,7 +19,7 @@ param byte_order = "little-endian";
 import "pci/common.dml";
 import "simics/simulator/conf-object.dml";
 import "simics/utils.dml";
-import "crc32_pcie-interface.dml";
+import "rtl_crc32-interface.dml";
 
 is pci_device;
 param pci_hotplug = true;
@@ -60,7 +60,7 @@ bank regs {
             } else {
                 log info, 3: "Start CRC32, size: %d bytes, source: 0x%x, dest: 0x%x", control.SIZE.val, source.val, dest.val;
                 try {
-                    engine.crc32_pcie.start_crc(source.val, dest.val, control.SIZE.val, true);
+                    engine.rtl_crc32.start_crc(source.val, dest.val, control.SIZE.val, true);
                     control.SIZE.val = 0; // reset the size since we are done
                 } catch {
                     log error: "CRC32 memory access failed";
@@ -75,7 +75,7 @@ bank regs {
 connect engine is init_as_subobj {
     param classname = "sample_tlm2_gasket_device";
     is post_init;
-    interface crc32_pcie;
+    interface rtl_crc32;
 
     method post_init() {
         log info, 1: "post_init()";

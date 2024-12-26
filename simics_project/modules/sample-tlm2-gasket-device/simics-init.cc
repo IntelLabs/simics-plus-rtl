@@ -14,9 +14,9 @@
 // Adapter base class (i.e. the Simics object), etc...
 #include <simics/systemc/systemc_library.h>
 #include <simics/c++/devs/signal.h>
-#include "c++/crc32_pcie-interface.h"
-#include "c++/systemc/crc32_io_cmd-interface-gasket.h"
-#include "c++/systemc/crc32_io_cmd-interface-simics-adapter.h"
+#include "c++/rtl_crc32-interface.h"
+#include "c++/systemc/rtl_crc32-interface-gasket.h"
+#include "c++/systemc/rtl_crc32-interface-simics-adapter.h"
 #include <tlm>
 #include <tlm_utils/simple_initiator_socket.h>
 #include <tlm_utils/simple_target_socket.h>
@@ -30,11 +30,11 @@ namespace scl = simics::systemc;
 // <add id="sample-tlm2-gasket-device/Adapter">
 // <insert-until text="// EOF_GASKET_ADAPTER"/></add>
 template <class TModel>
-class Adapter : public simics::systemc::Adapter, public scl::simics2tlm::Crc32PcieGasketAdapter
+class Adapter : public simics::systemc::Adapter, public scl::simics2tlm::RtlCrc32GasketAdapter
 {
 public:
     explicit Adapter(simics::ConfObjectRef o)
-        : simics::systemc::Adapter(o), Crc32PcieGasketAdapter(&crc32_device_, this), top_("top")
+        : simics::systemc::Adapter(o), RtlCrc32GasketAdapter(&crc32_device_, this), top_("top")
     {
 
         simics_io_busy_->set_pin(&top_.io_busy);
@@ -63,7 +63,7 @@ public:
                                    "Interrupt target.",
                                    ATTR_CLS_VAR(Adapter, simics_io_busy_)));
         cls->add(scl::iface::createAdapter<
-                 scl::iface::Crc32PcieSimicsAdapter<Adapter>>());
+                 scl::iface::RtlCrc32SimicsAdapter<Adapter>>());
 
         auto port = simics::make_class<CLASS_TYPE::Port>(
             CLASS_NAME ".port", CLASS_NAME " port",
@@ -89,7 +89,7 @@ public:
 private:
     TModel top_;
     scl::Connector<scl::tlm2simics::MemorySpace> simics_memory_space_;
-    scl::simics2tlm::Crc32PcieDevice crc32_device_;
+    scl::simics2tlm::RtlCrc32Device crc32_device_;
     scl::simics2systemc::Signal systemc_reset_;
     uint64_t freq_hz_;
 };

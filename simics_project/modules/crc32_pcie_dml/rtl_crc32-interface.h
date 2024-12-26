@@ -12,8 +12,8 @@
 
    The corresponding DML definition can be found in crc32_pcie_interface.dml */
 
-#ifndef CRC32_PCIE_INTERFACE_H
-#define CRC32_PCIE_INTERFACE_H
+#ifndef RTL_CRC32_INTERFACE_H
+#define RTL_CRC32_INTERFACE_H
 
 #include <simics/device-api.h>
 #include <simics/pywrap.h>
@@ -30,13 +30,13 @@ extern "C" {
 
 /* This defines a new interface type. Its corresponding C data type will be
    called "crc32_pcie_interface_t". */
-SIM_INTERFACE(crc32_pcie) {
+SIM_INTERFACE(rtl_crc32) {
         bool (*start_crc)(conf_object_t *obj, unsigned int src, unsigned int dst, size_t size, bool blocking);
 };
 
 /* Use a #define like this whenever you need to use the name of the interface
    type; the C compiler will then catch any typos at compile-time. */
-#define CRC32_PCIE_INTERFACE "crc32_pcie"
+#define RTL_CRC32_INTERFACE "rtl_crc32"
 
 #ifdef __cplusplus
 }
