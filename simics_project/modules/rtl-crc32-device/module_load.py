@@ -13,7 +13,7 @@
 import cli
 from . import utility
 
-device_class_names = ["sample_tlm2_gasket_device",]
+device_class_names = ["rtl_crc32_device",]
 
 #
 # ------------------------ info -----------------------

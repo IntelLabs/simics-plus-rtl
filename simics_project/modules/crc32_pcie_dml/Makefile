@@ -13,7 +13,6 @@
 
 # Simics module makefile
 
-IFACE_FILES := rtl_crc32-interface.h
 SIMICS_API := latest
 THREAD_SAFE:=yes
 MODULE_CLASSES = crc32_pcie_dml
@@ -22,6 +21,7 @@ SRC_FILES= crc32_pcie_dml.dml
 PYTHON_FILES := module_load.py
 
 EXTRA_MODULE_VPATH += dml-lib
+EXTRA_MODULE_VPATH += rtl-crc32-device
 
 # COMPILE time settings. Tell the compiler where to find
 # the headers and tell the linker where to find the library

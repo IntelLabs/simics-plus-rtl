@@ -23,7 +23,7 @@
 // The SystemC TLM device being wrapped
 #include "gasket-device.h"
 
-#define CLASS_NAME "sample_tlm2_gasket_device"
+#define CLASS_NAME "rtl_crc32_device"
 #define CLASS_TYPE Adapter<GasketDevice>
 
 namespace scl = simics::systemc;

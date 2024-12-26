@@ -13,11 +13,12 @@
 
 # Simics module makefile
 
-MODULE_CLASSES = sample_tlm2_gasket_device \
+IFACE_FILES := rtl_crc32-interface.h
+MODULE_CLASSES = rtl_crc32_device \
 
 SRC_FILES = gasket-device.cc simics-init.cc VCrc32__ALL.cpp
 PYTHON_FILES = module_load.py utility.py
-EXTRA_MODULE_VPATH = systemc-commands crc32_pcie_dml
+EXTRA_MODULE_VPATH = systemc-commands
 
 CXXFLAGS += -I/home/awmoore/pta/simics-plus-rtl/build/verilator_sc
 CXXFLAGS += -I/usr/share/verilator/include
