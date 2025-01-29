@@ -57,7 +57,7 @@ The Simics device and component instantiate the shared library built in the sect
 
 ## Simics QSP enabling
 
-We will now enable the required Quick Start Platform (QSP) packages with this Simics project so we can have a full-fledged system.
+We will now enable the required Quick Start Platform (QSP) packages with this Simics project so we can have a full-fledged system. For the `addon-manager` commands, answer yes to all questions.
 
 1. `Apptainer> cd /mnt/simics_project`
 2. `Apptainer> ./bin/addon-manager -C`
@@ -74,7 +74,7 @@ Note that while we will start Simics from the container (`Apptainer> `), we will
 2. `Apptainer> ./bin/craff -o os.craff archlinux-2024.12.01-x86_64.iso`
 3. `Apptainer> ./simics qsp-clearlinux-pci-crc32.simics disk0_image=os.craff iso_image=$SIMICS_BASE/targets/common/images/simics_agent_binaries.iso`
 4. `simics> c`
-5. Wait a few minutes until the OS logs in, follow the progress in the window with title: "machine.mb.gpu.vga - graphics console".After the OS has logged you in as root, you can interact with the machine as you normally would on this OS. 
+5. Wait a few minutes until the OS logs in, follow the progress in the window with title: "machine.mb.gpu.vga - graphics console". After the OS has logged you in as root, you can interact with the machine as you normally would on this OS.
 6. If network problems cause messages with "Refresh Pacman mirrorlist with Reflector" to appear periodically, disable it with:
     - `# systemctl stop reflector`
 7. Ensure the PCI device has been enumerated and can be seen by the OS. Note the memory address (assumed to be 0x800001000 in the following).
