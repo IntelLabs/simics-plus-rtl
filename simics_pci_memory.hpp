@@ -1,8 +1,7 @@
 #ifndef SIMICS_PCI_MEMORY_HPP
 #define SIMICS_PCI_MEMORY_HPP
 
-// simics API for PCI-based memory access
-#include <simics/c++/devs/pci.h>
+// simics API for memory access
 #include <simics/c++/devs/memory-space.h>
 
 static conf_object_t * device = NULL;

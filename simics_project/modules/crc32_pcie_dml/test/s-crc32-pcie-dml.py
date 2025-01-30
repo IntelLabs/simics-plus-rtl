@@ -18,6 +18,8 @@ import stest
 import dev_util as du
 from simics import SIM_create_object
 
+conf.sim.deprecations_as_errors = False
+
 def create_regs(device):
     class regs:
         class f5:
@@ -74,8 +76,9 @@ pci_bus = SIM_create_object('pci-bus', 'pci_bus', [['conf_space', pci_conf],
                                                    ['bridge', pci_bridge.obj]])
 mycrc32 = SIM_create_object('crc32_pcie_dml', 'mycrc32', [['pci_bus', pci_bus]])
 regs = create_regs(mycrc32)
-cmd_reg = du.Register((mycrc32, 'pci_config', 0x4), 0x2)  # PCI command register
-bar_reg = du.Register((mycrc32, 'pci_config', 0x10), 0x4) # PCI BAR register
+bank_regs = du.bank_regs(mycrc32.bank.pci_config)
+cmd_reg = bank_regs.command
+bar_reg = bank_regs.base_address_0
 
 addr = 0x100
 cmd_reg.write(2)     # Enable memory access
