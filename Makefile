@@ -15,7 +15,7 @@ SHARED_LIB = lib/$(LIBNAME).so
 # Generate a vcd trace during simulation
 USE_TRACE = 1
 # Easier debugging with gdb
-DEBUG = 1
+DEBUG = 0
 # track coverage of Verilated code
 USE_COVERAGE = 0
 
@@ -75,7 +75,7 @@ verilator_cxx_flags += -faligned-new -Wno-sign-compare
 verilator_cxx_flags += -isystem$(VERILATOR_INC_DIR)
 verilator_cxx_flags += -isystem$(VERILATOR_INC_DIR)/vltstd
 
-verilator_opt = --cc
+verilator_opt = --build
 verilator_opt += +define+RANDOMIZE_GARBAGE_ASSIGN
 verilator_opt += +define+RANDOMIZE_REG_INIT
 verilator_opt += +define+RANDOMIZE_MEM_INIT
@@ -85,6 +85,7 @@ verilator_opt += -Mdir ${verilator_build_dir}
 verilator_opt += -I$(chisel_build_dir)
 verilator_opt += -Wno-WIDTH
 verilator_opt += -CFLAGS -fPIC
+verilator_opt += -CFLAGS -I$(PWD)/systemc-2.3.4/src
 
 verilated_objs = $(verilator_build_dir)/verilated.o $(verilator_build_dir)/verilated_threads.o
 
@@ -115,7 +116,10 @@ $(chisel_build_dir)/filelist.f: $(shell find src/main -type f)
 	sbt 'runMain $(chisel_target_name) --target-dir $(chisel_build_dir)'
 
 $(verilator_build_dir)/V%__ALL.a: $(chisel_build_dir)/filelist.f
-	verilator --build --top-module $* $(verilator_opt) -f $<
+	verilator -sc --top-module $* $(verilator_opt) -f $<
+	rm -rf build/verilator_sc
+	mv build/verilator build/verilator_sc
+	verilator -cc --top-module $* $(verilator_opt) -f $<
 
 $(verilator_build_dir)/%.o: $(VERILATOR_INC_DIR)/%.cpp
 	$(CXX) -fPIC $(verilator_cxx_flags) -c $< -o $@

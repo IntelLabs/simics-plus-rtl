@@ -34,3 +34,16 @@ class CoreIO extends Bundle {
   val mem = new MemIO
   val busy = Output(Bool())
 }
+
+
+object DefaultCirctArgs {
+  // Using "--preserve-aggregate=all" below generates signals which
+  // use SystemVerilog packed structs. Unfortunately not fully yet supported by verilator:
+  // https://github.com/verilator/verilator/issues/860
+  val args = Array("--preserve-aggregate=1d-vec", "--scalarize-public-modules=false", "--scalarize-ext-modules=true", "--lowering-options=disallowLocalVariables,disallowPackedArrays,explicitBitcast,disallowPortDeclSharing", "--emit-chisel-asserts-as-sva")
+}
+
+object DefaultFirrtlArgs {
+  // Emit System Verilog, one module per file by default
+  val args = Array("--split-verilog")
+}

@@ -6,6 +6,7 @@ import chisel3.util._
 
 class Crc32 extends Module {
   val io = IO(new CoreIO())
+  val busy = Output(Bool())
 
   // the following table is adapted from:
   // https://github.com/freebsd/freebsd-src/blob/main/sys/libkern/gsb_crc32.c
@@ -107,7 +108,7 @@ class Crc32 extends Module {
     io.mem.req.bits.addr := src_addr
     io.mem.req.bits.size_in_bytes := 1.U
     io.mem.req.bits.data := DontCare
-    //printf("CRC32 RTL: Mem read at address 0x%x\n", io.mem.req.bits.addr.asUInt)
+    printf("CRC32 RTL: Mem read at address 0x%x\n", io.mem.req.bits.addr.asUInt)
     // keep incrementing as it fires
   }.elsewhen(state === s_write) {
     io.mem.req.valid := true.B
@@ -115,14 +116,14 @@ class Crc32 extends Module {
     io.mem.req.bits.addr := dst_addr
     io.mem.req.bits.size_in_bytes := 4.U
     io.mem.req.bits.data := (crc32_val ^ "hFFFFFFFF".U)
-    //printf("CRC32 RTL: Mem write at address 0x%x with data 0x%x\n", io.mem.req.bits.addr.asUInt, io.mem.req.bits.data.asUInt)
+    printf("CRC32 RTL: Mem write at address 0x%x with data 0x%x\n", io.mem.req.bits.addr.asUInt, io.mem.req.bits.data.asUInt)
   }.elsewhen(state === s_resp) {
     io.resp.valid := true.B
     io.resp.bits.data := (crc32_val ^ "hFFFFFFFF".U)
     state := s_idle // reset all states
     len := 0.U
     crc32_val := "hFFFFFFFF".U
-    //printf("CRC32 RTL: Response with data 0x%x\n", io.resp.bits.data.asUInt)
+    printf("CRC32 RTL: Response with data 0x%x\n", io.resp.bits.data.asUInt)
   }
 
   // a memory read/write has been accepted
@@ -137,25 +138,17 @@ class Crc32 extends Module {
       state := s_resp // now end
     }
   }
+  
+  when (true.B) {
+    printf("CRC32 RTL: State: %d, src_addr: 0x%x, dst_addr: 0x%x, len: 0x%x, crc32_val: 0x%x\n", state, src_addr.asUInt, dst_addr.asUInt, len.asUInt, crc32_val.asUInt);
+  }
 
   // the memory (read) response has arrived: do computation here
   when (io.mem.resp.valid) {
-    //printf("CRC32 RTL: Mem response with data 0x%x\n", io.mem.resp.bits.data.asUInt)
+    printf("CRC32 RTL: Mem response with data 0x%x\n", io.mem.resp.bits.data.asUInt)
     val nLookupIndex = ((crc32_val ^ (io.mem.resp.bits.data & "hFF".U)) & "hFF".U).asTypeOf(UInt(8.W))
     crc32_val := (crc32_val >> 8) ^ table(nLookupIndex)
   }
-}
-
-object DefaultCirctArgs {
-  // Using "--preserve-aggregate=all" below generates signals which
-  // use SystemVerilog packed structs. Unfortunately not fully yet supported by verilator:
-  // https://github.com/verilator/verilator/issues/860
-  val args = Array("--preserve-aggregate=1d-vec", "--scalarize-public-modules=false", "--scalarize-ext-modules=true", "--lowering-options=disallowLocalVariables,disallowPackedArrays,explicitBitcast,disallowPortDeclSharing", "--emit-chisel-asserts-as-sva")
-}
-
-object DefaultFirrtlArgs {
-  // Emit System Verilog, one module per file by default
-  val args = Array("--split-verilog")
 }
 
 object Crc32 extends App {

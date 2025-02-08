@@ -3,7 +3,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
  && apt-get -y install --no-install-recommends curl make openjdk-21-jdk g++ \
-                          python3 verilator libgtk2.0-0 libxpm4 libxxf86vm1 \
+                          libboost-dev python3 verilator libgtk2.0-0 libxpm4 libxxf86vm1 \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 

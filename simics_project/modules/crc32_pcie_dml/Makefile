@@ -21,6 +21,7 @@ SRC_FILES= crc32_pcie_dml.dml
 PYTHON_FILES := module_load.py
 
 EXTRA_MODULE_VPATH += dml-lib
+EXTRA_MODULE_VPATH += crc32-rtl-device
 
 # COMPILE time settings. Tell the compiler where to find
 # the headers and tell the linker where to find the library
@@ -30,7 +31,7 @@ EXTERNAL_LIB_LOC_BUILD = ../../../../..
 EXTERNAL_LIB_LOC_RUN = ../../../..
 MODULE_CFLAGS  += -I$(EXTERNAL_LIB_LOC_BUILD)
 MODULE_LDFLAGS += -L$(EXTERNAL_LIB_LOC_BUILD)/lib
-MODULE_LDFLAGS += -Wl,-rpath,'$(EXTERNAL_LIB_LOC_RUN)/lib'
-LIBS += -l$(EXTERNAL_LIB_BASE_NAME)
+# MODULE_LDFLAGS += -Wl,-rpath,'$(EXTERNAL_LIB_LOC_RUN)/lib'
+# LIBS += -l$(EXTERNAL_LIB_BASE_NAME)
 
 include $(MODULE_MAKEFILE)

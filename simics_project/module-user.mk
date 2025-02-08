@@ -1,0 +1,1 @@
+export BOOST_INC_PATH := /usr/include/boost
